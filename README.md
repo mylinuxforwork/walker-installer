@@ -1,4 +1,17 @@
-# Walker Installer Script
+# Walker Installer
+
+## Arch Linux
+
+yay -S walker-bin
+
+## Fedora
+
+```
+sudo dnf copr enable errornointernet/walker
+sudo dnf install elephant
+sudo dnf install walker
+```
+## openSuse
 
 Usage: walkerinstaller.sh [OPTIONS]"
 

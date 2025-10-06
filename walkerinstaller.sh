@@ -32,7 +32,6 @@ _show_help() {
 _install_walker() {
     echo "--- Installing Walker ---"
 
-    # Remove legacy build folder
     if [ -d "$CACHE_DIR/walker" ]; then
         rm -rf "$CACHE_DIR/walker"
         echo ":: Legacy build folder $CACHE_DIR/walker removed"
@@ -47,31 +46,13 @@ _install_walker() {
     cd "$CACHE_DIR/walker"
 
     # Build with Cargo
-    echo ":: Starting build with Cargo..."
-    if ! cargo build --release; then
-        echo ":: ERROR: Walker build failed."
-        exit 1
-    fi
+    echo ":: Starting build ..."
+    sudo make install
 
-    WALKER_BIN="$CACHE_DIR/walker/target/release/walker"
-
-    if [ -f "$WALKER_BIN" ]; then
-        # Remove installed walker binary
-        if [ -f "$BIN_DIR/walker" ]; then
-            rm "$BIN_DIR/walker"
-            echo ":: Old $BIN_DIR/walker removed"
-        fi
-
-        # Copy new binary
-        cp "$WALKER_BIN" "$BIN_DIR"
-        echo ":: walker bin copied from $WALKER_BIN to $BIN_DIR"
-    else
-        echo ":: ERROR: Build failed - Binary not found at $WALKER_BIN"
-        exit 1
-    fi
+    WALKER_BIN="/usr/local/bin/walker"
 
     # Success message
-    if [ -f "$BIN_DIR/walker" ]; then
+    if [ -f "$WALKER_BIN" ]; then
         echo ":: Installation of walker complete"
     else
         echo ":: ERROR: Installation of walker failed"
@@ -84,7 +65,6 @@ _install_walker() {
 _install_elephant() {
     echo "--- Installing Elephant Core ---"
 
-    # Remove legacy build folder
     if [ -d "$CACHE_DIR/elephant" ]; then
         rm -rf "$CACHE_DIR/elephant"
         echo ":: Legacy build folder $CACHE_DIR/elephant removed"
@@ -96,31 +76,22 @@ _install_elephant() {
         echo ":: ERROR: Failed to clone Elephant repository."
         exit 1
     fi
+    cd "$CACHE_DIR/elephant"
     
     # Build and install the main binary
     echo ":: Starting build and install for Elephant..."
-    cd "$CACHE_DIR/elephant/cmd/elephant" || exit 1
-    if ! go install elephant.go; then
-        echo ":: ERROR: Elephant installation failed."
-        exit 1
-    fi
+    sudo make install
 
-    ELEPHANT_BIN="$HOME/go/bin/elephant"
+    ELEPHANT_BIN="/usr/local/bin/elephant"
 
+    # Success message
     if [ -f "$ELEPHANT_BIN" ]; then
-        # Remove installed elephant binary
-        if [ -f "$BIN_DIR/elephant" ]; then
-            rm "$BIN_DIR/elephant"
-            echo ":: Old $BIN_DIR/elephant removed"
-        fi
-
-        # Copy new binary
-        cp "$ELEPHANT_BIN" "$BIN_DIR"
-        echo ":: elephant bin copied from $ELEPHANT_BIN to $BIN_DIR"
+        echo ":: Installation of elephant complete"
     else
-        echo ":: ERROR: Build failed - Binary not found at $ELEPHANT_BIN"
+        echo ":: ERROR: Installation of elephant failed"
         exit 1
     fi
+    echo
 
     # Create configuration directories
     mkdir -p ~/.config/elephant/providers
