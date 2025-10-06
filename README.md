@@ -14,3 +14,6 @@ Options:
 ```
 
 Default behavior (no options): Install walker, elephant, and the 'desktopapplications' provider.
+
+The script will install walker and elephant to the folder ~/.local/bin folder. Please add this folder to your path variable to execute the binaries without adding the full path.
+
