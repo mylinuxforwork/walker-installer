@@ -18,9 +18,6 @@ _show_help() {
     echo "Options:"
     echo "  -w, --walker              Install only the 'walker' binary."
     echo "  -e, --elephant            Install only the 'elephant' core."
-    echo "  -p <provider>, --provider <provider>"
-    echo "                            Install a specific provider (e.g., 'desktopapplications')."
-    echo "                            Can be specified multiple times."
     echo "  -h, --help                Show this help message and exit."
     echo ""
     echo "Default behavior (no options): Install walker, elephant, and the 'desktopapplications' provider."
@@ -33,7 +30,7 @@ _install_walker() {
     echo "--- Installing Walker ---"
 
     if [ -d "$CACHE_DIR/walker" ]; then
-        rm -rf "$CACHE_DIR/walker"
+        sudo rm -rf "$CACHE_DIR/walker"
         echo ":: Legacy build folder $CACHE_DIR/walker removed"
     fi
 
@@ -66,7 +63,7 @@ _install_elephant() {
     echo "--- Installing Elephant Core ---"
 
     if [ -d "$CACHE_DIR/elephant" ]; then
-        rm -rf "$CACHE_DIR/elephant"
+        sudo rm -rf "$CACHE_DIR/elephant"
         echo ":: Legacy build folder $CACHE_DIR/elephant removed"
     fi
 
@@ -138,7 +135,6 @@ _install_provider() {
 
 INSTALL_WALKER=false
 INSTALL_ELEPHANT=false
-INSTALL_PROVIDERS=() # Array to store provider names
 
 # Parse arguments for short and long options
 while [[ "$#" -gt 0 ]]; do
@@ -153,17 +149,6 @@ while [[ "$#" -gt 0 ]]; do
         -e|--elephant)
             INSTALL_ELEPHANT=true
             ;;
-        -p|--provider)
-            # Check if the next argument is a provider name and not another flag
-            if [ -n "$2" ] && [[ "$2" != -* ]]; then
-                INSTALL_PROVIDERS+=("$2")
-                shift # Consume the provider name argument
-            else
-                echo ":: ERROR: Argument for $1 (provider name) missing." >&2
-                _show_help
-                exit 1
-            fi
-            ;;
         *)
             echo ":: ERROR: Unknown parameter: $1" >&2
             _show_help
@@ -174,11 +159,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Check if any specific option was chosen. If not, default to full install.
-if ! $INSTALL_WALKER && ! $INSTALL_ELEPHANT && [ ${#INSTALL_PROVIDERS[@]} -eq 0 ]; then
-    echo ":: No specific flags provided. Performing full default installation (walker, elephant, and desktopapplications provider)."
+if ! $INSTALL_WALKER && ! $INSTALL_ELEPHANT ]; then
+    echo ":: No specific flags provided. Performing full default installation (walker and elephant)."
     INSTALL_WALKER=true
     INSTALL_ELEPHANT=true
-    INSTALL_PROVIDERS+=("desktopapplications")
 fi
 
 # --- Execution Phase ---
@@ -191,23 +175,4 @@ fi
 # 2. Install Elephant
 if $INSTALL_ELEPHANT; then
     _install_elephant
-fi
-
-# 3. Install Providers
-if [ ${#INSTALL_PROVIDERS[@]} -gt 0 ]; then
-    
-    # Dependency check for providers: they require the elephant source files to be cloned.
-    # If the user only requested a provider (-p) without -e, we must install elephant first.
-    if ! $INSTALL_ELEPHANT; then
-        if [ ! -d "$CACHE_DIR/elephant" ]; then
-            echo ":: Warning: Providers require Elephant source code. Installing Elephant core first..."
-            _install_elephant
-        else
-            echo ":: Found existing Elephant source code, proceeding with provider installation."
-        fi
-    fi
-
-    for provider_name in "${INSTALL_PROVIDERS[@]}"; do
-        _install_provider "$provider_name"
-    done
 fi
