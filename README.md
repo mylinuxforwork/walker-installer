@@ -11,6 +11,11 @@ sudo dnf copr enable errornointernet/walker
 sudo dnf install elephant
 sudo dnf install walker
 ```
+
+```
+sudo dnf install gtk4-devel gobject-introspection-devel poppler-devel poppler-glib-devel gtk4-layer-shell-devel protoc go
+```
+
 ## openSuse
 
 Usage: walkerinstaller.sh [OPTIONS]"
